@@ -1,0 +1,47 @@
+#!/usr/bin/env node
+
+'use strict';
+
+const csvStringify = require('csv-stringify');
+const mysql = require('mysql');
+
+function helpAndExit() {
+  console.error(`
+Usage: ${require('path').basename(__filename)} SQL > some.csv
+
+    Runs SQL query and outputs results to STDOUT as CSV.
+
+    SQL can be a string like 'select Id from My_Table' or it can be a file name
+    that contains SQL. If SQL starts with 'select' and also contains 'from', we
+    assume you passed a query. If not we assume you passed a file path.
+`);
+  process.exit(13);
+}
+
+if (process.argv.length < 3) {
+  helpAndExit();
+}
+
+const configPath = require('path').join(process.cwd(), './mysqlio-config');
+const options = require(configPath).source;
+const connection = mysql.createConnection(options);
+
+let query = process.argv[2];
+if (!query.trim().toLowerCase().startsWith('select ') ||
+  !query.toLowerCase().includes(' from ')) {
+  // Assume query is a file.
+  query = require('fs').readFileSync(query).toString();
+}
+
+connection.query(query).stream()
+  .on('error', (err) => {
+    console.error('ERROR: ' + err.stack || err);
+    process.exit(13);
+  })
+  .on('end', () => {
+    connection.end();
+  })
+  .pipe(csvStringify({
+    header: true
+  }))
+  .pipe(process.stdout);
