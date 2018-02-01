@@ -56,3 +56,7 @@ exports = module.exports = {
   }
 };
 ```
+
+## Misc
+
+https://stackoverflow.com/questions/8899802/how-do-i-do-a-bulk-insert-in-mysql-using-node-js

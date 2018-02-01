@@ -9,6 +9,7 @@
   "author": "John Stein",
   "license": "Unlicense",
   "dependencies": {
+    "csv-stream-transform": "0.0.1",
     "csv-stringify": "2.0.1",
     "mysql": "2.15.0"
   }
