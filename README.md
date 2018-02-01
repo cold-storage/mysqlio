@@ -15,10 +15,12 @@ npm i -g mysqlio
 
 ## Enjoy
 
-```
-mysqlio-query   SQL         > some.csv
+For extended help, type the command name with no arguments.
 
-mysqlio-insert  TABLE_DEF   < some.csv
+```
+mio-query SQL > some.csv
+
+mio-insert TABLE_NAME [CREATE_TABLE] [CREATE_INDEX] < some.csv
 ```
 
 ## Confguration
