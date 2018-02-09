@@ -8,6 +8,18 @@ const configPath = require('path').join(process.cwd(), './mysqlio-config');
 const options = require(configPath).dest;
 const connection = mysql.createConnection(options);
 
+/*
+
+  TODO !!! There's an option multipleStatements: Allow multiple mysql statements
+  per query. Be careful with this, it could increase the scope of SQL injection
+  attacks. (Default: false)
+
+  If we set multipleStatements to true, we can put the table create and all the
+  index create statements in a single ddl.sql file and mysql will parse out the
+  multiple statements for us (no need to split on ;)
+  and run all the DDL statements in sequence.
+
+*/
 const createIndex = require('fs').readFileSync('./test/create-index.sql', 'utf8');
 const dropCreate = createIndex.split(';');
 const drop = dropCreate[0];

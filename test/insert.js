@@ -46,8 +46,8 @@ function insert(cb) {
   if (rows.length > 0) {
     const fieldValues = transform(rows);
     const sql = `insert into ${process.argv[2]} ${fieldValues.fields} values ?`;
-    console.log(sql);
-    console.log(fieldValues);
+    // console.log(sql);
+    // console.log(fieldValues);
     connection.query(sql, [fieldValues.values], (err) => {
       rows.length = 0;
       cb(err);

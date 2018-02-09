@@ -1,0 +1,143 @@
+#!/usr/bin/env node
+
+'use strict';
+
+const mysql = require('mysql');
+
+function helpAndExit() {
+  console.error(`
+Usage: ${require('path').basename(__filename)} TABLE [DROP_CREATE] [INDEXES] < some.csv
+
+    Inserts CSV data from STDIN into the specified TABLE.
+
+    DROP_CREATE is an optional path to a file with drop/create table DDL
+    statements.
+
+    If INDEXES is specified, DROP_CREATE is required.
+
+    INDEXES is an optional path to a file with index create DDL statements.
+`);
+  process.exit(13);
+}
+
+if (process.argv.length < 3) {
+  helpAndExit();
+}
+
+const configPath = require('path').join(process.cwd(), './mysqlio-config');
+const options = require(configPath).dest;
+options.multipleStatements = true;
+const connection = mysql.createConnection(options);
+
+const table = process.argv[2];
+const dropCreate = process.argv[3];
+const indexes = process.argv[4];
+
+function handleError(err) {
+  if (err) {
+    console.error(err.stack || err);
+    process.exit(13);
+  }
+}
+
+function doDropCreate(cb) {
+  if (dropCreate) {
+    const ddl = require('fs').readFileSync(dropCreate, 'utf8');
+    connection.query(ddl, cb);
+  } else {
+    cb();
+  }
+}
+
+function doInsert(cb) {
+  const rows = [];
+  const batchSize = 1000;
+  const parser = require('csv-parse')({
+    columns: true
+  });
+  const doFields = function doFields(rows) {
+    const keys = Object.keys(rows[0]);
+    return '(' + keys.join(',') + ')';
+  };
+  const doValues = function doValues(rows) {
+    const vals = [];
+    rows.forEach((r) => {
+      const a = [];
+      vals.push(a);
+      Object.keys(r).forEach((k) => {
+        a.push(r[k]);
+      });
+    });
+    return vals;
+  };
+  /*
+    Here we take and array of json like this.
+    [ { Name: 'Fred', Age: 13 }, { Name: 'Linda', Age: 11 } ]
+    and turn it into this.
+    { fields: '(Name, Age)', values: [['Fred', 13],['Linda', 11]] }
+  */
+  const transform = function transform(rows) {
+    const result = {
+      fields: doFields(rows),
+      values: doValues(rows)
+    };
+    return result;
+  };
+  const insertRows = function insertRows(cb) {
+    if (rows.length > 0) {
+      const fieldValues = transform(rows);
+      const sql = `insert into ${process.argv[2]} ${fieldValues.fields} values ?`;
+      // console.log(sql);
+      // console.log(fieldValues);
+      connection.query(sql, [fieldValues.values], (err) => {
+        rows.length = 0;
+        cb(err);
+      });
+    } else {
+      cb();
+    }
+  };
+  const transformer = new require('stream').Transform({
+    transform(row, encoding, cb) {
+      rows.push(row);
+      if (rows.length === batchSize) {
+        insertRows(cb);
+      } else {
+        cb();
+      }
+    },
+    flush(cb) {
+      insertRows((err) => {
+        connection.end();
+        cb(err);
+      });
+    },
+    objectMode: true
+  });
+  process.stdin
+    .on('error', handleError)
+    .pipe(parser)
+    .on('error', handleError)
+    .pipe(transformer)
+    .on('error', handleError)
+    .on('finish', cb);
+}
+
+function doIndexes(cb) {
+  if (indexes) {
+    const ddl = require('fs').readFileSync(indexes, 'utf8');
+    connection.query(ddl, cb);
+  } else {
+    cb();
+  }
+}
+
+doDropCreate((err) => {
+  handleError(err);
+  doInsert((err) => {
+    handleError(err);
+    doIndexes((err) => {
+      handleError(err);
+    });
+  });
+});
