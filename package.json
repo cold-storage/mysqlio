@@ -1,6 +1,6 @@
 {
   "name": "mysqlio",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Stream data in and out of MySQL",
   "author": "John Stein",
   "license": "Unlicense",
