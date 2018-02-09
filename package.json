@@ -2,17 +2,17 @@
   "name": "mysqlio",
   "version": "0.0.0",
   "description": "Stream data in and out of MySQL",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "author": "John Stein",
   "license": "Unlicense",
+  "bin": {
+    "mio-insert": "bin/mio-insert",
+    "mio-query": "bin/mio-query"
+  },
   "dependencies": {
     "csv-stringify": "2.0.1",
     "mysql": "2.15.0"
   },
   "devDependencies": {
-    "csv-stream-transform": "0.0.1",
+    "csv-stream-transform": "0.0.1"
   }
 }
