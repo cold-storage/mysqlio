@@ -29,6 +29,25 @@ mio-insert TABLE [DROP_CREATE] [INDEXES] < some.csv
 
 For extended help, type the command name with no arguments.
 
+## mio-query
+
+`mio-query` will run the specified `SQL` query and output the results to STDOUT.
+
+`SQL` may be a file that contains SQL or it can be an actual SQL string like
+'select Id from Account'.
+
+## mio-insert
+
+`mio-insert` will insert CSV data from STDIN into the specified `TABLE`. Column
+names in the CSV must match exactly table field names.
+
+`DROP_CREATE` is an optional path to a file of DDL statements to drop/create the
+table. If specified this will be run before inserting the data.
+
+`INDEXES` is an option path to a file of DDL statements to drop/create indexes.
+If specified this will be run after inserting the data, since it's generally
+faster to insert data and then create indexes.
+
 ## Confguration
 
 mysqlio looks for a file named `mysqlio-config.js` in the current directory.
@@ -63,26 +82,3 @@ exports = module.exports = {
   }
 };
 ```
-
-## mio-query
-
-`mio-query` will run the specified `SQL` query and output the results to STDOUT.
-
-`SQL` may be a file that contains SQL or it can be an actual SQL string like
-'select Id from Account'.
-
-## mio-insert
-
-`mio-insert` will insert CSV data from STDIN into the specified `TABLE`. Column
-names in the CSV must match exactly table field names.
-
-`DROP_CREATE` is an optional path to a file of DDL statements to drop/create the
-table. If specified this will be run before inserting the data.
-
-`INDEXES` is an option path to a file of DDL statements to drop/create indexes.
-If specified this will be run after inserting the data, since it's generally
-faster to insert data and then create indexes.
-
-## Misc
-
-https://stackoverflow.com/questions/8899802/how-do-i-do-a-bulk-insert-in-mysql-using-node-js
