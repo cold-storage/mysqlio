@@ -44,7 +44,7 @@ names in the CSV must match exactly table field names.
 `DROP_CREATE` is an optional path to a file of DDL statements to drop/create the
 table. If specified this will be run before inserting the data.
 
-`INDEXES` is an option path to a file of DDL statements to drop/create indexes.
+`INDEXES` is an option path to a file of DDL statements to create indexes.
 If specified this will be run after inserting the data, since it's generally
 faster to insert data and then create indexes.
 
